@@ -1,0 +1,20 @@
+{
+  "name": "braces",
+  "version": "1.0.0",
+  "description": "HTML",
+  "main": "braces.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "html",
+    "templating",
+    "template"
+  ],
+  "author": "Adam Carruthers",
+  "license": "MIT",
+  "dependencies": {
+    "jison": "^0.4.15",
+    "sizzle": "^2.1.1"
+  }
+}

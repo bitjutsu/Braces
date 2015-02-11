@@ -3,12 +3,16 @@
 %lex
 %%
 
-\s*\n\s*               {/* ignore line breaks */}
-"}"                    { return '}'; }
-"{"                    { return '{'; }
-\s*"<"[^{}<>]+">"\s*   { return 'DESCRIPTOR'; }
-[^{}<>]+               { return 'CONTENT'; }
-<<EOF>>                { return 'EOF'; }
+\s*\n\s*                                 {/* ignore line breaks */}
+"}"                                      { return '}'; }
+"{"                                      { return '{'; }
+[A-Za-z0-9\-]+                           { return 'TAG'; }
+"#"[A-Za-z0-9\-_]+                       { return 'ID'; }
+"."[A-Za-z0-9\-_]+                       { return 'CLASS'; }
+"["[A-Za-z0-9\-_]+("=\""[^"]*"\"")?"]"   { return 'ATTR'; }
+("\""[^\"]+"\"")|("'"[^']+"'")           { return 'CONTENT'; }
+<<EOF>>                                  { return 'EOF'; }
+\s*                                      { return 'SEP'; }
 /lex
 
 %%
@@ -26,17 +30,31 @@ data
   ;
 
 expr
-  : DESCRIPTOR '{' '}'
+  : descriptor SEP '{' '}'
     %{
       $$ = {
-        descriptor: $DESCRIPTOR,
+        descriptor: $descriptor,
         children: []
       };
     %}
-  | DESCRIPTOR '{' data '}'
+  | descriptor '{' '}'
     %{
       $$ = {
-        descriptor: $DESCRIPTOR,
+        descriptor: $descriptor,
+        children: []
+      };
+    %}
+  | descriptor SEP '{' data '}'
+    %{
+      $$ = {
+        descriptor: $descriptor,
+        children: $data
+      };
+    %}
+  | descriptor '{' data '}'
+    %{
+      $$ = {
+        descriptor: $descriptor,
         children: $data
       };
     %}
@@ -46,4 +64,45 @@ expr
         content: yytext,
       };
     %}
+  ;
+
+descriptor
+  : singletons plentifuls
+    { $$ = $singletons + $plentifuls; }
+  | singletons
+    { $$ = $singletons; }
+  | plentifuls
+    { $$ = $plentifuls; }
+  ;
+
+singletons
+  : TAG ID
+    { $$ = $TAG + $ID; }
+  | TAG
+    { $$ = $TAG; }
+  | ID
+    { $$ = $ID; }
+  ;
+
+plentifuls
+  : classlist attrlist
+    { $$ = $classlist + $attrlist; }
+  | classlist
+    { $$ = $classlist; }
+  | attrlist
+    { $$ = $attrlist; }
+  ;
+
+classlist
+  : CLASS classlist
+    { $$ = $CLASS + $classlist; }
+  | CLASS
+    { $$ = $CLASS; }
+  ;
+
+attrlist
+  : ATTR attrlist
+    { $$ = $ATTR + $attrlist; }
+  | ATTR
+    { $$ = $ATTR; }
   ;

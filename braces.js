@@ -8,14 +8,13 @@
         input = fs.readFileSync(process.argv[2], 'utf8'),
         syntaxTree = parser.parse(input);
 
-    fs.writeFileSync('debug.json', JSON.stringify(syntaxTree));
     // For each node in the syntax tree generate the node and its children
     fs.writeFileSync(outFile, syntaxTree.map(processNode).join(''));
 
     function processNode(el) {
         if (el.content) {
             // Content node
-            return el.content;
+            return el.content.replace(/^"|"$|^'|'$/g, '');
         } else if (el.descriptor) {
             var tags = descriptorToMarkup(el.descriptor.replace(/<|>/g, '')),
                 output = tags.open,

@@ -1,0 +1,28 @@
+html[lang="en"] {
+    head {
+        meta[charset="utf-8"] {}
+        title {
+            'Content?'
+        }
+
+        link[rel="stylesheet"][href="/assets/styles.css"] {}
+    }
+
+    body {
+        'Text goes here. Even "quotes" are allowed!'
+
+        header.navbar {
+            .container {
+                "Oooooh but here there are 'single quotes'!"
+            }
+        }
+
+        main#content.container {
+            "And here there are even {braces}!"
+        }
+
+        footer.stick-to-bottom {
+            "&copy; 2000-Something Someone, Somewhere."
+        }
+    }
+}

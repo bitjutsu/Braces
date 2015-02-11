@@ -1,7 +1,7 @@
 {
   "name": "braces",
-  "version": "1.0.0",
-  "description": "HTML",
+  "version": "0.1.0",
+  "description": "We use braces everywhere else, why not with HTML?",
   "main": "braces.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,7 +14,6 @@
   "author": "Adam Carruthers",
   "license": "MIT",
   "dependencies": {
-    "jison": "^0.4.15",
-    "sizzle": "^2.1.1"
+    "jison": "^0.4.15"
   }
 }

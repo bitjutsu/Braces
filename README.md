@@ -2,7 +2,7 @@
 Braces is a shot at taking the nice bits of modern HTML and CSS and making a markup language that's clean, easy to read, and fun to write.
 
 You can write:
-```
+```less
 html[lang="en"] {
     head {
         meta[charset="utf-8"] {}
@@ -19,7 +19,12 @@ html[lang="en"] {
 }
 ```
 
-And get back:
+Execute:
+```shell
+> node braces.js example.br
+```
+
+And get back (in `out.html`):
 ```html
 <html lang="en">
     <meta charset="utf-8">

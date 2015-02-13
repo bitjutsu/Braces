@@ -16,7 +16,7 @@
             // Content node
             return el.content.replace(/^"|"$|^'|'$/g, '');
         } else if (el.descriptor) {
-            var tags = descriptorToMarkup(el.descriptor.replace(/<|>/g, '')),
+            var tags = descriptorToMarkup(el.descriptor),
                 output = tags.open,
                 children = el.children,
                 index = -1,
@@ -40,14 +40,14 @@
             closeTag = "",
             index = 0;
 
-        var commonSeparators = '{[\\]#';
+        var commonSeparators = '[\\]#';
         var specificSeparators = '\\s.';
         var tagRegexp = new RegExp('^([^' + specificSeparators + commonSeparators + ']+)');
         var classRegexp = new RegExp('\\.([^' + specificSeparators + commonSeparators + ']+)', 'g');
         var idRegexp = new RegExp('#([^' + specificSeparators + commonSeparators + ']+)');
         var attrRegexp = new RegExp('\\[([^' + commonSeparators + ']+)\\]', 'g');
 
-        // Match and consume attrs first because they can 
+        // Match and consume attrs first because they can
         // contain '.' causing them to appear as class names
         attrs = getAllMatches(attrRegexp, descriptor);
         descriptor = descriptor.replace(attrRegexp, '');

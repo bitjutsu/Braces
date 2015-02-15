@@ -11,10 +11,8 @@ html[lang="en"] {
         }
     }
 
-    body {
-        .container {
-            'Content!'
-        }
+    body > .container {
+        'Content!'
     }
 }
 ```
@@ -39,7 +37,7 @@ And get back (in `out.html`):
 </html>
 ```
 
-Even in this simple example, Braces markup is 30 characters less than pure HTML (excluding whitespace). The point of this is not compression - the generated parser itself is almost 24kb. The point is more maintainable, clear code.
+Even in this simple example, Braces markup is just over 30 characters less than pure HTML (excluding whitespace). The point of this is not compression - the generated parser itself is almost 24kb. The point is more maintainable, clear code.
 
 Those extra 30 characters clutter and obscure the important information in an HTML document.
 

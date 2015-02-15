@@ -1,24 +1,23 @@
 html[lang="en"] {
     head {
-        meta[charset="utf-8"] {}
+        meta[charset='utf-8'] {}
         title {
             'Content?'
         }
 
-        link[rel="stylesheet"][href="/assets/styles.css"] {}
+        link[rel="stylesheet"]
+            [href="/assets/styles.css"] {}
     }
 
     body {
         'Text goes here. Even "quotes" are allowed!'
 
-        header.navbar {
-            .container {
-                "Oooooh but here there are 'single quotes'!"
-            }
+        header.navbar > .container {
+            "Oooooh but here there are 'single quotes'!"
         }
 
         main#content.container {
-            "And here there are even {braces}!"
+            "And here's a link to " a[href="http://github.com/bitjutsu/Braces"] { 'braces' } "!"
         }
 
         footer.stick-to-bottom {

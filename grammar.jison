@@ -11,11 +11,14 @@
 "["                             { return '['; }
 "]"                             { return ']'; }
 "="                             { return '='; }
+">"                             { return '>'; }
 [A-Za-z0-9\-]+                  { return 'DESCRIPTOR_COMPONENT'; }
 ("\""[^\"]+"\"")|("'"[^']+"'")  { return 'CONTENT'; }
 <<EOF>>                         { return 'EOF'; }
 
 /lex
+
+%right '>'
 
 %%
 
@@ -55,7 +58,15 @@ expr
   ;
 
 descriptor
-  : singletons plentifuls
+  : descriptor '>' descriptor
+    %{
+      $$ = {
+        left: $1,
+        operator: '>',
+        right: $3
+      };
+    %}
+  | singletons plentifuls
     %{
       $$ = {
         tag: $singletons.tag,

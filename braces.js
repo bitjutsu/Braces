@@ -11,27 +11,53 @@
     // For each node in the syntax tree generate the node and its children
     fs.writeFileSync(outFile, syntaxTree.map(processNode).join(''));
 
-    function processNode(el) {
-        if (el.content) {
+    function processNode(node) {
+        if (node.content) {
             // Content node
-            return el.content;
-        } else if (el.descriptor) {
-            var tags = descriptorToMarkup(el.descriptor),
-                output = tags.open,
-                children = el.children,
-                index = -1,
-                length = children.length;
+            return node.content;
+        } else if (node.descriptor) {
+            var tags = descriptorToMarkup(node.descriptor),
+                inner = generateInnerMarkup(node.children);
 
-            while (++index < length) {
-                output += processNode(children[index]);
-            }
-
-            return output + tags.close;
+            return tags.open + inner + tags.close;
         }
+
+        throw new Error('Unable to process node ' + JSON.stringify(node));
+    }
+
+    function generateInnerMarkup(children) {
+        var output = '',
+            index = -1,
+            length = children.length;
+
+        while (++index < length) {
+            output += processNode(children[index]);
+        }
+
+        return output;
     }
 
     // NB declaring class and id as attributes is silly and is not taken into consideration.
     function descriptorToMarkup(descriptor) {
+        if (descriptor.operator) {
+            switch (descriptor.operator) {
+            case '>':
+                var left = generateTags(descriptor.left),
+                    right = descriptorToMarkup(descriptor.right);
+
+                return {
+                    open: left.open + right.open,
+                    close: right.close + left.close
+                };
+            default:
+                throw new Error('No handler for operator ' + descriptor.operator);
+            }
+        } else {
+            return generateTags(descriptor);
+        }
+    }
+
+    function generateTags(descriptor) {
         descriptor.tag = descriptor.tag || 'div';
 
         var openTag = '<' + descriptor.tag,

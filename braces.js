@@ -14,7 +14,7 @@
     function processNode(el) {
         if (el.content) {
             // Content node
-            return el.content.replace(/^"|"$|^'|'$/g, '');
+            return el.content;
         } else if (el.descriptor) {
             var tags = descriptorToMarkup(el.descriptor),
                 output = tags.open,
@@ -32,54 +32,26 @@
 
     // NB declaring class and id as attributes is silly and is not taken into consideration.
     function descriptorToMarkup(descriptor) {
-        var tag = void 0,
-            classes = [],
-            id = void 0,
-            attrs = [],
-            openTag = "",
-            closeTag = "",
-            index = 0;
+        descriptor.tag = descriptor.tag || 'div';
 
-        var commonSeparators = '[\\]#';
-        var specificSeparators = '\\s.';
-        var tagRegexp = new RegExp('^([^' + specificSeparators + commonSeparators + ']+)');
-        var classRegexp = new RegExp('\\.([^' + specificSeparators + commonSeparators + ']+)', 'g');
-        var idRegexp = new RegExp('#([^' + specificSeparators + commonSeparators + ']+)');
-        var attrRegexp = new RegExp('\\[([^' + commonSeparators + ']+)\\]', 'g');
+        var openTag = '<' + descriptor.tag,
+            closeTag;
 
-        // Match and consume attrs first because they can
-        // contain '.' causing them to appear as class names
-        attrs = getAllMatches(attrRegexp, descriptor);
-        descriptor = descriptor.replace(attrRegexp, '');
-
-        tag = getMatch(tagRegexp, descriptor) || 'div';
-        id = getMatch(idRegexp, descriptor) || void 0;
-        classes = getAllMatches(classRegexp, descriptor);
-
-        openTag = '<' + tag;
-        if (id) {
-            openTag += ' id="' + id + '"';
+        if (descriptor.id) {
+            openTag += ' id="' + descriptor.id + '"';
         }
 
-        if (classes.length > 0) {
-            openTag += ' class="';
-
-            for (index = 0; index < classes.length; index++) {
-                openTag += ' ' + classes[index];
-            }
-
-            openTag += '"';
+        if (descriptor.classes && descriptor.classes.length > 0) {
+            openTag += ' class="' + descriptor.classes.join(' ') + '"';
         }
 
-        if (attrs.length > 0) {
-            for (index = 0; index < attrs.length; index++) {
-                openTag += ' ' + attrs[index];
-            }
+        if (descriptor.attrs && descriptor.attrs.length > 0) {
+            openTag += ' ' + descriptor.attrs.join(' ');
         }
 
         openTag += '>';
 
-        closeTag = '</' + tag + '>';
+        closeTag = '</' + descriptor.tag + '>';
 
         return {
             open: openTag,

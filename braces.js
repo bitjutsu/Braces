@@ -13,12 +13,12 @@
         return this.parser.parse(markup);
     };
 
-    Braces.prototype.parseSyntaxTree = function parseSyntaxTree(syntaxTree) {
+    Braces.prototype.evaluateSyntaxTree = function evaluateSyntaxTree(syntaxTree) {
         return generateInnerMarkup(syntaxTree);
     };
 
     Braces.prototype.parse = function parse(markup) {
-        return this.parseSyntaxTree(this.generateSyntaxTree(markup));
+        return this.evaluateSyntaxTree(this.generateSyntaxTree(markup));
     };
 
     function generateInnerMarkup(children) {

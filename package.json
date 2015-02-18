@@ -2,7 +2,7 @@
   "name": "braces",
   "version": "0.1.0",
   "description": "We use braces everywhere else, why not with HTML?",
-  "main": "braces.js",
+  "main": "br",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,6 +14,7 @@
   "author": "Adam Carruthers",
   "license": "MIT",
   "dependencies": {
+    "commander": "^2.6.0",
     "jison": "^0.4.15"
   }
 }

@@ -1,15 +1,29 @@
-(function (gimme) {
+(function () {
     'use strict';
 
-    var fs = gimme('fs'),
-        parser = gimme('./parser'),
-        inFile = process.argv[2],
-        outFile = 'out.html',
-        input = fs.readFileSync(process.argv[2], 'utf8'),
-        syntaxTree = parser.parse(input);
+    var parser = require('./parser');
 
-    // For each node in the syntax tree generate the node and its children
-    fs.writeFileSync(outFile, syntaxTree.map(processNode).join(''));
+    module.exports = Braces;
+
+    function Braces() {
+        this.parser = parser;
+    }
+
+    Braces.prototype.generateSyntaxTree = function generateSyntaxTree(markup) {
+        return this.parser.parse(markup);
+    };
+
+    Braces.prototype.parseSyntaxTree = function parseSyntaxTree(syntaxTree) {
+        return generateInnerMarkup(syntaxTree);
+    };
+
+    Braces.prototype.parse = function parse(markup) {
+        return this.parseSyntaxTree(this.generateSyntaxTree(markup));
+    };
+
+    function generateInnerMarkup(children) {
+        return children.map(processNode).join('');
+    }
 
     function processNode(node) {
         if (node.content) {
@@ -23,18 +37,6 @@
         }
 
         throw new Error('Unable to process node ' + JSON.stringify(node));
-    }
-
-    function generateInnerMarkup(children) {
-        var output = '',
-            index = -1,
-            length = children.length;
-
-        while (++index < length) {
-            output += processNode(children[index]);
-        }
-
-        return output;
     }
 
     // NB declaring class and id as attributes is silly and is not taken into consideration.
@@ -121,4 +123,4 @@
 
         return results;
     }
-}(require));
+}());

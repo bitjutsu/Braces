@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+
+(function () {
+    'use strict';
+
+    var program = require('commander'),
+        path = require('path'),
+        fs = require('fs'),
+        Braces = require('./braces');
+
+    program
+        .version('0.0.1')
+        .usage('[options] <file>')
+        .option('-d, --debug', 'output the syntax tree to debug.json')
+        .option('-o, --out <file>', 'specify the output file')
+        .parse(process.argv);
+
+    if (program.args.length != 1) {
+        program.help();
+    }
+
+    var inFile = program.args[0];
+    var outFile = program.out || getExtensionlessFileName(inFile) + '.html';
+
+    var markup = fs.readFileSync(inFile, 'utf8');
+    var braces = new Braces();
+
+    if (program.debug) {
+        var syntaxTree = braces.generateSyntaxTree(markup);
+        fs.writeFileSync('debug.json', prettyPrintJson(syntaxTree));
+    }
+
+    var html = braces.parse(markup);
+    fs.writeFileSync(outFile, html);
+
+    // Convenience functions:
+    function prettyPrintJson(json) {
+        return JSON.stringify(json, null, '  ') + '\n';
+    }
+
+    function getExtensionlessFileName(fileName) {
+        return path.basename(fileName, path.extname(fileName));
+    }
+}());

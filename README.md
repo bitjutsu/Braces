@@ -19,10 +19,10 @@ html[lang="en"] {
 
 Execute:
 ```shell
-> node braces.js example.br
+> ./br examples/example.br
 ```
 
-And get back (in `out.html`):
+And get back (in `example.html`):
 ```html
 <html lang="en">
     <meta charset="utf-8">
@@ -49,7 +49,7 @@ It feels wrong to talk about using a "selector" when your document isn't even bu
 ## A note on descriptor strictness
 Currently descriptors can only be written in a specific order: `tag#id.classes[attrs]`. This strict ordering keeps parsing simple and keeps code predictable, such that code like the following can't happen:
 
-```
+```less
 myElement[hasThisAttr]#andThisId.andThisClass {
     butMyOtherElement#hasThisId[andThisAttr].andThisClass { }
 }

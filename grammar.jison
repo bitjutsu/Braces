@@ -38,21 +38,25 @@ expr
   : descriptor '{' '}'
     %{
       $$ = {
-        descriptor: $descriptor,
-        children: []
+        handler: 'br-descriptor',
+        args: [ $descriptor ],
+        block: []
       };
     %}
   | descriptor '{' data '}'
     %{
       $$ = {
-        descriptor: $descriptor,
-        children: $data
+        handler: 'br-descriptor',
+        args: [ $descriptor ],
+        block: $data
       };
     %}
   | CONTENT
     %{
       $$ = {
-        content: $CONTENT.replace(/^'|'$|^"|"$/g, '')
+        handler: 'br-content',
+        args: [],
+        block: $CONTENT.replace(/^'|'$|^"|"$/g, '')
       };
     %}
   ;

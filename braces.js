@@ -1,65 +1,72 @@
 (function () {
     'use strict';
 
-    var parser = require('./parser');
+    var parser = require('./parser'),
+        brDescriptor = require('./extensions/br-descriptor'),
+        brContent = require('./extensions/br-content');
 
     module.exports = Braces;
 
-    function Braces() {
+    function Braces(extensions) {
         this.parser = parser;
+
+        this.extensions = extensions || {};
+
+        // Set up builtin "extensions":
+        this.extensions['br-descriptor'] = new brDescriptor(this);
+        this.extensions['br-content'] = new brContent(this);
     }
 
     Braces.prototype.generateSyntaxTree = function generateSyntaxTree(markup) {
+        //this.extensions.forEach(firePreGenerate);
         return this.parser.parse(markup);
     };
 
     Braces.prototype.evaluateSyntaxTree = function evaluateSyntaxTree(syntaxTree) {
-        return generateInnerMarkup(syntaxTree);
+        var self = this;
+        var result = syntaxTree.map(function processNode(node) {
+            var extension = self.extensions[node.handler];
+            if (!extension || !extension.parseNode) {
+                throw new Error('No parseNode function found for handler ' + node.handler);
+            }
+
+            return extension.parseNode(node);
+        }).join('');
+
+        //this.extensions.forEach(firePostEvaluate);
+        return result;
     };
 
     Braces.prototype.parse = function parse(markup) {
         return this.evaluateSyntaxTree(this.generateSyntaxTree(markup));
     };
 
-    function generateInnerMarkup(children) {
-        return children.map(processNode).join('');
-    }
+    Braces.prototype.isDescriptor = function isDescriptor(obj) {
+        return (typeof obj == 'object') &&
+               ((obj.left && obj.operator && obj.right) ||
+                (obj.tag || obj.id || obj.attrs || obj.classes));
+    };
 
-    function processNode(node) {
-        if (node.content) {
-            // Content node
-            return node.content;
-        } else if (node.descriptor) {
-            var tags = descriptorToMarkup(node.descriptor),
-                inner = generateInnerMarkup(node.children);
-
-            return tags.open + inner + tags.close;
+    Braces.prototype.generateTagsForDescriptor = function generateTagsForDescriptor(descriptor) {
+        if (!descriptor.operator) {
+            return baseGenerateTags(descriptor);
         }
 
-        throw new Error('Unable to process node ' + JSON.stringify(node));
-    }
+        switch (descriptor.operator) {
+        case '>':
+            var left = baseGenerateTags(descriptor.left),
+                right = generateTagsForDescriptor(descriptor.right);
 
-    // NB declaring class and id as attributes is silly and is not taken into consideration.
-    function descriptorToMarkup(descriptor) {
-        if (descriptor.operator) {
-            switch (descriptor.operator) {
-            case '>':
-                var left = generateTags(descriptor.left),
-                    right = descriptorToMarkup(descriptor.right);
-
-                return {
-                    open: left.open + right.open,
-                    close: right.close + left.close
-                };
-            default:
-                throw new Error('No handler for operator ' + descriptor.operator);
-            }
-        } else {
-            return generateTags(descriptor);
+            return {
+                open: left.open + right.open,
+                close: right.close + left.close
+            };
+        default:
+            throw new Error('No handler for operator ' + descriptor.operator);
         }
-    }
+    };
 
-    function generateTags(descriptor) {
+    function baseGenerateTags(descriptor) {
         descriptor.tag = descriptor.tag || 'div';
 
         var openTag = '<' + descriptor.tag,
@@ -87,40 +94,15 @@
         };
     }
 
-    function getMatch(regex, input) {
-        var matches = regex.exec(input);
-
-        if (matches && matches[1]) {
-            return matches[1];
+    function firePreGenerate(extension) {
+        if (extension && extension.preGenerate) {
+            extension.preGenerate();
         }
-
-        return null;
     }
 
-        /* Get all capture group matches from a regular expression. */
-    function getAllMatches(regex, input) {
-        var matches = void 0,
-            results = [];
-
-        if (!regex.global) {
-            var matches = regex.exec(input);
-
-            matches.shift();
-
-            return matches;
+    function firePostEvaluate(extension) {
+        if (extension && extension.postEvaluate) {
+            extension.postEvaluate();
         }
-
-        /* do-while because a match needs to be tried at least once - and
-        also because do-whiles are badass. */
-        do {
-            matches = regex.exec(input);
-
-            if (matches != null && matches.length > 1) {
-                /* Grab the value of the first capture group: */
-                results.push(matches[1]);
-            }
-        } while (matches != null);
-
-        return results;
     }
 }());

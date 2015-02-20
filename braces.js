@@ -10,15 +10,21 @@
     function Braces(extensions) {
         this.parser = parser;
 
-        this.extensions = extensions || {};
+        this.extensions = {};
 
         // Set up builtin "extensions":
         this.extensions['br-descriptor'] = new brDescriptor(this);
         this.extensions['br-content'] = new brContent(this);
+
+        // Declare after builtins to allow for overriding.
+        var self = this;
+        Object.keys(extensions).forEach(function (key) {
+            self.extensions[key] = new extensions[key](this);
+        });
     }
 
     Braces.prototype.generateSyntaxTree = function generateSyntaxTree(markup) {
-        //this.extensions.forEach(firePreGenerate);
+        firePreGenerate(this.extensions);
         return this.parser.parse(markup);
     };
 
@@ -33,7 +39,7 @@
             return extension.parseNode(node);
         }).join('');
 
-        //this.extensions.forEach(firePostEvaluate);
+        firePostEvaluate(this.extensions);
         return result;
     };
 
@@ -94,15 +100,21 @@
         };
     }
 
-    function firePreGenerate(extension) {
-        if (extension && extension.preGenerate) {
-            extension.preGenerate();
-        }
+    function firePreGenerate(extensions) {
+        Object.keys(extensions).forEach(function (key) {
+            var extension = extensions[key];
+            if (extension && extension.preGenerate) {
+                extension.preGenerate();
+            }
+        });
     }
 
-    function firePostEvaluate(extension) {
-        if (extension && extension.postEvaluate) {
-            extension.postEvaluate();
-        }
+    function firePostEvaluate(extensions) {
+        Object.keys(extensions).forEach(function (key) {
+            var extension = extensions[key];
+            if (extension && extension.postEvaluate) {
+                extension.postEvaluate();
+            }
+        });
     }
 }());

@@ -20,6 +20,10 @@ html[lang="en"] {
             "And here's a link to " a[href="http://github.com/bitjutsu/Braces"] { 'braces' } "!"
         }
 
+        br-example("args on args on args") {
+            Now I'm all caps! And I didn't even need quotes around me!
+        }
+
         footer.stick-to-bottom {
             "&copy; 2000-Something Someone, Somewhere."
         }

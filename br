@@ -10,7 +10,8 @@
     program
         .version('0.0.1')
         .usage('[options] <file>')
-        .option('-d, --debug', 'output the syntax tree to debug.json')
+        .option('-d, --extension-directory <dir>', 'specify a directory to use for extensions')
+        .option('-e, --extensions <files>', 'specify a comma separated list of extensions', list)
         .option('-o, --out <file>', 'specify the output file')
         .parse(process.argv);
 
@@ -22,12 +23,10 @@
     var outFile = program.out || getExtensionlessFileName(inFile) + '.html';
 
     var markup = fs.readFileSync(inFile, 'utf8');
-    var braces = new Braces();
 
-    if (program.debug) {
-        var syntaxTree = braces.generateSyntaxTree(markup);
-        fs.writeFileSync('debug.json', prettyPrintJson(syntaxTree));
-    }
+    var extensions = fetchExtensions(program.extensionDirectory, program.extensions);
+
+    var braces = new Braces(extensions);
 
     var html = braces.parse(markup);
     fs.writeFileSync(outFile, html);
@@ -39,5 +38,21 @@
 
     function getExtensionlessFileName(fileName) {
         return path.basename(fileName, path.extname(fileName));
+    }
+
+    function fetchExtensions(dir, names) {
+        dir = dir || ('.' + path.sep);
+        names = names || [];
+
+        var extensions = {};
+        names.forEach(function (name) {
+            extensions[name] = require('.' + path.sep + dir + path.sep + name);
+        });
+
+        return extensions;
+    }
+
+    function list(val) {
+        return val.split(',');
     }
 }());

@@ -1,17 +1,34 @@
 /* Braces */
 
 %lex
+%x block
 %%
 
 \s+                             {/* ignore white space */}
-"}"                             { return '}'; }
-"{"                             { return '{'; }
+
+<block>"{"                      { this.pushState('block'); return 'BLOCK_BODY'; }
+<block>[^{}]+                   { return 'BLOCK_BODY'; }
+<block>"}"                      %{
+                                  this.popState();
+
+                                  if (this.topState() == 'INITIAL') {
+                                    return '}';
+                                  } else {
+                                    return 'BLOCK_BODY';
+                                  }
+                                %}
+
+"{"                             { this.pushState('block'); return '{'; }
+"}"                             { this.popState(); return '}'; }
+"("                             { return '('; }
+")"                             { return ')'; }
 "#"                             { return '#'; }
 "."                             { return '.'; }
 "["                             { return '['; }
 "]"                             { return ']'; }
 "="                             { return '='; }
 ">"                             { return '>'; }
+","                             { return ','; }
 [A-Za-z0-9\-]+                  { return 'DESCRIPTOR_COMPONENT'; }
 ("\""[^\"]+"\"")|("'"[^']+"'")  { return 'CONTENT'; }
 <<EOF>>                         { return 'EOF'; }
@@ -40,15 +57,15 @@ expr
       $$ = {
         handler: 'br-descriptor',
         args: [ $descriptor ],
-        block: []
+        block: null
       };
     %}
-  | descriptor '{' data '}'
+  | descriptor '{' block '}'
     %{
       $$ = {
         handler: 'br-descriptor',
         args: [ $descriptor ],
-        block: $data
+        block: $block
       };
     %}
   | CONTENT
@@ -59,6 +76,56 @@ expr
         block: $CONTENT.replace(/^'|'$|^"|"$/g, '')
       };
     %}
+  | tag '(' arglist ')' '{' block '}'
+    %{
+      $$ = {
+        handler: $tag,
+        args: $arglist,
+        block: $block
+      };
+    %}
+  | tag '(' ')' '{' block '}'
+    %{
+      $$ = {
+        handler: $tag,
+        args: [],
+        block: $block
+      };
+    %}
+  | tag '(' arglist ')' '{' '}'
+    %{
+      $$ = {
+        handler: $tag,
+        args: $arglist,
+        block: null
+      };
+    %}
+  | tag '(' ')' '{' '}'
+    %{
+      $$ = {
+        handler: $tag,
+        args: [],
+        block: null
+      };
+    %}
+  ;
+
+arglist
+  : descriptor
+    { $$ = [$descriptor]; }
+  | CONTENT
+    { $$ = [$CONTENT]; }
+  | descriptor ',' arglist
+    { $$ = [$descriptor].concat($arglist); }
+  | CONTENT ',' arglist
+    { $$ = [$CONTENT].concat($arglist); }
+  ;
+
+block
+  : BLOCK_BODY
+    { $$ = $BLOCK_BODY; }
+  | BLOCK_BODY block
+    { $$ = $BLOCK_BODY + $block; }
   ;
 
 descriptor

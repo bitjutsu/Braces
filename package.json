@@ -4,7 +4,8 @@
   "description": "We use braces everywhere else, why not with HTML?",
   "main": "br",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "coverage": "istanbul cover _mocha -- -R spec"
   },
   "keywords": [
     "html",
@@ -16,5 +17,8 @@
   "dependencies": {
     "commander": "^2.6.0",
     "jison": "^0.4.15"
+  },
+  "devDependencies": {
+    "should": "^5.2.0"
   }
 }

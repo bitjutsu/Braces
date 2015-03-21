@@ -18,7 +18,7 @@
 
         // Declare after builtins to allow for overriding.
         var self = this;
-        Object.keys(extensions).forEach(function (key) {
+        Object.keys(extensions || {}).forEach(function (key) {
             self.extensions[key] = new extensions[key](this);
         });
     }
@@ -48,9 +48,9 @@
     };
 
     Braces.prototype.isDescriptor = function isDescriptor(obj) {
-        return (typeof obj == 'object') &&
+        return Boolean((typeof obj == 'object') &&
                ((obj.left && obj.operator && obj.right) ||
-                (obj.tag || obj.id || obj.attrs || obj.classes));
+                (obj.tag || obj.id || obj.attrs || obj.classes)));
     };
 
     Braces.prototype.generateTagsForDescriptor = function generateTagsForDescriptor(descriptor) {

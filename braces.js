@@ -3,7 +3,8 @@
 
     var parser = require('./parser'),
         brDescriptor = require('./extensions/br-descriptor'),
-        brContent = require('./extensions/br-content');
+        brContent = require('./extensions/br-content'),
+        brInclude = require('./extensions/br-include');
 
     module.exports = Braces;
 
@@ -15,11 +16,12 @@
         // Set up builtin "extensions":
         this.extensions['br-descriptor'] = new brDescriptor(this);
         this.extensions['br-content'] = new brContent(this);
+        this.extensions['br-include'] = new brInclude(this);
 
         // Declare after builtins to allow for overriding.
         var self = this;
         Object.keys(extensions || {}).forEach(function (key) {
-            self.extensions[key] = new extensions[key](this);
+            self.extensions[key] = new extensions[key](self);
         });
     }
 

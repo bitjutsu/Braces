@@ -28,7 +28,15 @@
 
     var braces = new Braces(extensions);
 
+    // Change working directory to infile to preserve relative path contexts:
+    var originalDir = process.cwd();
+    process.chdir(path.dirname(inFile));
+
     var html = braces.parse(markup);
+
+    // Restore the working directory to write out the processed HTML:
+    process.chdir(originalDir);
+
     fs.writeFileSync(outFile, html);
 
     // Convenience functions:

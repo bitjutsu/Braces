@@ -68,12 +68,12 @@ expr
         block: $block
       };
     %}
-  | CONTENT
+  | content
     %{
       $$ = {
         handler: 'br-content',
         args: [],
-        block: $CONTENT.replace(/^'|'$|^"|"$/g, '')
+        block: $content
       };
     %}
   | tag '(' arglist ')' '{' block '}'
@@ -113,12 +113,17 @@ expr
 arglist
   : descriptor
     { $$ = [$descriptor]; }
-  | CONTENT
-    { $$ = [$CONTENT]; }
+  | content
+    { $$ = [$content]; }
   | descriptor ',' arglist
     { $$ = [$descriptor].concat($arglist); }
-  | CONTENT ',' arglist
-    { $$ = [$CONTENT].concat($arglist); }
+  | content ',' arglist
+    { $$ = [$content].concat($arglist); }
+  ;
+
+content
+  : CONTENT
+    { $$ = $CONTENT.replace(/^'|'$|^"|"$/g, ''); }
   ;
 
 block
